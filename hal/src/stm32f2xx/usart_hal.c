@@ -44,7 +44,7 @@ typedef enum USART_Num_Def {
 /* Private macro -------------------------------------------------------------*/
 #define USE_USART3_HARDWARE_FLOW_CONTROL_RTS_CTS 0  //Enabling this => 1 is not working at present
 // IS_USART_CONFIG_VALID(config) - returns true for 8 data bit, any flow control, any parity, any stop byte configurations
-#define IS_USART_CONFIG_VALID(CONFIG) (((CONFIG & SERIAL_VALID_CONFIG) >> 2) != 0b11)
+#define IS_USART_CONFIG_VALID(CONFIG) ((((CONFIG & 0b00001100)>>2) != 0b11) && ((CONFIG & 0b10) != 0b10))
 
 /* Private variables ---------------------------------------------------------*/
 typedef struct STM32_USART_Info {
@@ -156,17 +156,25 @@ void HAL_USART_Init(HAL_USART_Serial serial, Ring_Buffer *rx_buffer, Ring_Buffer
 
 void HAL_USART_Begin(HAL_USART_Serial serial, uint32_t baud)
 {
+<<<<<<< HEAD
   HAL_USART_BeginConfig(serial, baud, 0, 0); // Default serial configuration is 8N1
+=======
+  HAL_USART_BeginConfig(serial, baud, 0, 0); //Default serial configuration is 8N1
+>>>>>>> 876fed4... Merge branch '1' into fuckel-develop
 }
 
 void HAL_USART_BeginConfig(HAL_USART_Serial serial, uint32_t baud, uint32_t config, void *ptr)
 {
+<<<<<<< HEAD
   // Verify UART configuration, exit if it's invalid.
+=======
+  //Verify UART configuration, exit it it's invalid.
+>>>>>>> 876fed4... Merge branch '1' into fuckel-develop
   if (!IS_USART_CONFIG_VALID(config)) {
 	usartMap[serial]->usart_enabled = false;
 	return;
   }
-  
+
 	USART_DeInit(usartMap[serial]->usart_peripheral);
 
 	// Configure USART Rx and Tx as alternate function push-pull, and enable GPIOA clock
@@ -218,7 +226,10 @@ void HAL_USART_BeginConfig(HAL_USART_Serial serial, uint32_t baud, uint32_t conf
 	USART_InitStructure.USART_BaudRate = baud;
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 876fed4... Merge branch '1' into fuckel-develop
   #if USE_USART3_HARDWARE_FLOW_CONTROL_RTS_CTS    // Electron
 	if (serial == HAL_USART_SERIAL3)
 	{
@@ -226,6 +237,7 @@ void HAL_USART_BeginConfig(HAL_USART_Serial serial, uint32_t baud, uint32_t conf
 	}
   #endif
 
+<<<<<<< HEAD
 	// Stop bit configuration.
 	switch (config & SERIAL_STOP_BITS) {
 	  case 0b00: // 1 stop bit
@@ -238,17 +250,39 @@ void HAL_USART_BeginConfig(HAL_USART_Serial serial, uint32_t baud, uint32_t conf
 		USART_InitStructure.USART_StopBits = USART_StopBits_0_5;
 		break;
 	  case 0b11: // 1.5 stop bits
+=======
+
+	//Stop bit configuration.
+	switch (config & 0b00000011) {
+	  case 0: // 1 stop bit
+		USART_InitStructure.USART_StopBits = USART_StopBits_1;
+		break;
+	  case 1: // 2 stop bits
+		USART_InitStructure.USART_StopBits = USART_StopBits_2;
+		break;
+	  case 2: // 0.5 stop bits
+		USART_InitStructure.USART_StopBits = USART_StopBits_0_5;
+		break;
+	  case 3: // 1.5 stop bits
+>>>>>>> 876fed4... Merge branch '1' into fuckel-develop
 		USART_InitStructure.USART_StopBits = USART_StopBits_1_5;
 		break;
 	}
 
+<<<<<<< HEAD
 	// Eight / Nine data bit configuration
 	if (config & SERIAL_NINE_BITS) {
 		// Nine data bits, no parity.
+=======
+	//Eight/Nine data bit configuration
+	if(config & 0b00010000) {
+		//Nine data bits, no parity.
+>>>>>>> 876fed4... Merge branch '1' into fuckel-develop
 		USART_InitStructure.USART_Parity = USART_Parity_No;
 		USART_InitStructure.USART_WordLength = USART_WordLength_9b;
 	} else {
 		// eight data bits, parity configuration (impacts word length)
+<<<<<<< HEAD
 		switch ((config & SERIAL_PARITY_BITS) >> 2) {
 		  case 0b00: // none
 			USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -259,11 +293,33 @@ void HAL_USART_BeginConfig(HAL_USART_Serial serial, uint32_t baud, uint32_t conf
 			USART_InitStructure.USART_WordLength = USART_WordLength_9b;
 			break;
 		  case 0b10: // odd
+=======
+		switch ((config & 0b00001100) >> 2) {
+		  case 0: // none
+			USART_InitStructure.USART_Parity = USART_Parity_No;
+			USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+			break;
+		  case 1: // even
+			USART_InitStructure.USART_Parity = USART_Parity_Even;
+			USART_InitStructure.USART_WordLength = USART_WordLength_9b;
+			break;
+		  case 2: // odd
+>>>>>>> 876fed4... Merge branch '1' into fuckel-develop
 			USART_InitStructure.USART_Parity = USART_Parity_Odd;
 			USART_InitStructure.USART_WordLength = USART_WordLength_9b;
 			break;
 		}
 	}
+<<<<<<< HEAD
+=======
+
+#if USE_USART3_HARDWARE_FLOW_CONTROL_RTS_CTS    // Electron
+	if (serial == HAL_USART_SERIAL3)
+	{
+		USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_RTS_CTS;
+	}
+#endif
+>>>>>>> 876fed4... Merge branch '1' into fuckel-develop
 
 	// Configure USART
 	USART_Init(usartMap[serial]->usart_peripheral, &USART_InitStructure);
@@ -281,7 +337,11 @@ void HAL_USART_BeginConfig(HAL_USART_Serial serial, uint32_t baud, uint32_t conf
 
 void HAL_USART_End(HAL_USART_Serial serial)
 {
+<<<<<<< HEAD
 	// Wait for transmission of outgoing data
+=======
+	// wait for transmission of outgoing data
+>>>>>>> 876fed4... Merge branch '1' into fuckel-develop
 	while (usartMap[serial]->usart_tx_buffer->head != usartMap[serial]->usart_tx_buffer->tail);
 
 	// Disable the USART
